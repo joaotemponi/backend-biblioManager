@@ -1,3 +1,9 @@
+import { query } from "express";
+import { DatabaseModel } from "./DatabaseModel";
+import { inspect } from "util";
+
+const database = new DatabaseModel().pool;
+
 /** 
  * Classe que representa um aluno
  */
@@ -7,7 +13,7 @@ export class Aluno {
     /* Identificador do aluno */
     private idAluno: number = 0;
     /* RA do aluno */
-    private ra: string;
+    private ra: string = "";
     /* Nome do aluno */
     private nome: string;
     /* Sobrenome do aluno */
@@ -22,18 +28,16 @@ export class Aluno {
     private celular: string;
 
     /**
- * Construtor da classe Aluno
- * 
- * @param ra RA do aluno
- * @param nome Nome do aluno
- * @param sobrenome Sobrenome do aluno
- * @param dataNascimento Data de nascimento do aluno
- * @param endereco Endereço do aluno
- * @param email Email do aluno
- * @param celular Celular do aluno
- */
+     * Construtor da classe Aluno
+     * 
+     * @param nome Nome do aluno
+     * @param sobrenome Sobrenome do aluno
+     * @param dataNascimento Data de nascimento do aluno
+     * @param endereco Endereço do aluno
+     * @param email Email do aluno
+     * @param celular Celular do aluno
+     */
     constructor(
-        ra: string,
         nome: string,
         sobrenome: string,
         dataNascimento: Date,
@@ -41,7 +45,6 @@ export class Aluno {
         email: string,
         celular: string
     ) {
-        this.ra = ra;
         this.nome = nome;
         this.sobrenome = sobrenome;
         this.dataNascimento = dataNascimento;
@@ -193,5 +196,78 @@ export class Aluno {
         this.celular = celular;
     }
 
+    /**
+     * Realiza a listagem de alunos no banco de dados.
+     * 
+     * Esta função consulta a tabela `aluno` e retorna uma lista de objetos do tipo `Aluno`. 
+     * Se houver um erro durante a consulta, a função retorna `null`.
+     * 
+     * @returns {Promise<Array<Aluno> | null>} - Um array de objetos do tipo `Aluno` em caso de sucesso ou `null` se ocorrer um erro.
+     */
+    static async listarAlunos(): Promise<Array<Aluno> | null> {
+        const listaDeAlunos: Array<Aluno> = [];
 
+        try {
+            const querySelectAluno = `SELECT * FROM aluno`;
+            const respostaBD = await database.query(querySelectAluno);
+
+            respostaBD.rows.forEach((linha: { nome: string; sobrenome: string; data_nascimento: string | number | Date; endereco: string; email: string; celular: string; id_aluno: number; }) => {
+                const novoAluno = new Aluno(
+                    linha.nome,
+                    linha.sobrenome,
+                    new Date(linha.data_nascimento),
+                    linha.endereco,
+                    linha.email,
+                    linha.celular
+                );
+
+                novoAluno.setIdAluno(linha.id_aluno);
+
+                listaDeAlunos.push(novoAluno);
+            });
+
+            return listaDeAlunos;
+        } catch (error) {
+            console.log('Erro ao buscar lista de alunos. Consulte os logs para mais detalhes.');
+            console.log(error);
+            return null;
+        }
+    }
+
+    /**
+     * Cadastra um novo aluno no banco de dados.
+     * 
+     * Esta função recebe um objeto `Aluno`, extrai as informações relevantes e realiza uma operação de inserção (INSERT) na tabela `aluno`.
+     * Se o cadastro for bem-sucedido, a função retorna `true`, caso contrário, retorna `false`.
+     * 
+     * @param {Aluno} aluno - Objeto contendo os dados do aluno a ser cadastrado.
+     * 
+     * @returns {Promise<boolean>} - Retorna `true` se o cadastro foi realizado com sucesso, ou `false` se ocorreu um erro.
+     */
+    static async cadastrarAluno(aluno: Aluno): Promise<boolean> {
+        try {
+            const queryInsertAluno = `INSERT INTO aluno (nome, sobrenome, data_nascimento, endereco, email, celular)
+                                      VALUES
+                                      ('${aluno.getNome()}', 
+                                      '${aluno.getSobrenome()}', 
+                                      '${aluno.getDataNascimento()}',
+                                       '${aluno.getEndereco()}', 
+                                       '${aluno.getEmail()}', 
+                                       '${aluno.getCelular()}')
+                                      RETURNING id_aluno;`;
+
+            const respostaBD = await database.query(queryInsertAluno);
+
+            if (respostaBD.rowCount != 0) {
+                console.log(`Aluno cadastrado com sucesso. ID do aluno: ${respostaBD.rows[0].id_aluno}`);
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.log('Erro ao cadastrar o aluno. Consulte os logs para mais detalhes.');
+            console.log(error);
+            return false;
+        }
+    }
 }

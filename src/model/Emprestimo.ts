@@ -1,3 +1,8 @@
+import { DatabaseModel } from "./DatabaseModel";
+
+const database = new DatabaseModel().pool;
+
+
 /**
  * Classe que representa um empréstimo.
  */
@@ -41,7 +46,7 @@ export class Emprestimo {
     }
 
     /* Métodos get e set */
-    
+
     /**
      * Recupera o identificador do empréstimo
      * @returns o identificador do empréstimo
@@ -147,4 +152,55 @@ export class Emprestimo {
     public setStatusEmprestimo(statusEmprestimo: Date): void {
         this.statusEmprestimo = statusEmprestimo;
     }
+
+
+    static async listarEmprestimos(): Promise<Array<Emprestimo> | null> {
+        const listaDeEmprestimos: Array<Emprestimo> = [];
+
+        try {
+            const querySelectEmprestimos = `SELECT * FROM emprestimo;`;
+            const respostaBD = await database.query(querySelectEmprestimos);
+
+            respostaBD.rows.forEach((linha: { id_aluno: number; id_livro: number; data_emprestimo: string | number | Date; data_devolucao: string | number | Date; status_emprestimo: Date; id_emprestimo: number; }) => {
+                const novoEmprestimo = new Emprestimo(
+                    linha.id_aluno,
+                    linha.id_livro,
+                    new Date(linha.data_emprestimo),
+                    new Date(linha.data_devolucao),
+                    linha.status_emprestimo
+                );
+
+                novoEmprestimo.setIdEmprestimo(linha.id_emprestimo);
+
+                listaDeEmprestimos.push(novoEmprestimo);
+            });
+
+            return listaDeEmprestimos;
+        } catch (error) {
+            console.log('Erro ao buscar lista de empréstimos');
+            return null;
+        }
+    }
+
+    static async cadastrarEmprestimo(idAluno: number, idLivro: number, dataEmprestimo: Date, dataDevolucao: Date, statusEmprestimo: string): Promise<boolean> {
+        try {
+            const queryInsertEmprestimo = `INSERT INTO emprestimo (id_aluno, id_livro, data_emprestimo, data_devolucao, status_emprestimo)
+                                           VALUES
+                                           (${idAluno}, ${idLivro}, '${dataEmprestimo.toISOString()}', '${dataDevolucao.toISOString()}', '${statusEmprestimo}')
+                                           RETURNING id_emprestimo;`;
+
+            const respostaBD = await database.query(queryInsertEmprestimo);
+            if (respostaBD.rowCount != 0) {
+                console.log(`Empréstimo cadastrado com sucesso. ID empréstimo: ${respostaBD.rows[0].id_emprestimo}`);
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.log('Erro ao cadastrar o empréstimo. Consulte os logs para mais detalhes.');
+            console.log(error);
+            return false;
+        }
+    }
+
 }

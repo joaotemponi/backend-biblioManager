@@ -1,3 +1,4 @@
+-- CREATE ALUNO - TRIGGER - FUNCTION
 CREATE SEQUENCE seq_ra START 1;
 
 CREATE TABLE Aluno (
@@ -23,6 +24,7 @@ BEFORE INSERT ON Aluno
 FOR EACH ROW EXECUTE FUNCTION gerar_ra();
 
 
+-- CRIANDO A TABELA LIVRO
 CREATE TABLE Livro (
     id_livro SERIAL PRIMARY KEY,
     titulo VARCHAR (200) NOT NULL,
@@ -36,6 +38,17 @@ CREATE TABLE Livro (
     status_livro_emprestado VARCHAR (20)
 );
 
+-- CRIANDO A TABELA EMPRESTIMO
+CREATE TABLE Emprestimo (
+    id_emprestimo SERIAL PRIMARY KEY,
+    id_aluno INT REFERENCES Aluno(id_aluno),
+    id_livro INT REFERENCES Livro(id_livro),
+    data_emprestimo DATE NOT NULL,
+    data_devolucao DATE,
+    status_emprestimo VARCHAR (20)
+);
+
+-- FAZENDO INSERT NA TABELA Aluno
 INSERT INTO Aluno (nome, sobrenome, data_nascimento, endereco, email, celular) 
 VALUES 
 ('Conor', 'McGregor', '2005-01-15', 'Rua UFC, 123', 'mcgregor@ufc.com', '16998959876'),
@@ -48,7 +61,6 @@ VALUES
 ('Sheilla', 'Castro', '2003-04-25', 'Rua Volei, 2028', 'sheilla.castro@volei.com', '16981974547'),
 ('Gabriela', 'Guimarães', '2007-08-19', 'Rua Volei, 2028', 'gaby@volei.com', '16983932215'),
 ('Magic', 'Johnson', '2003-07-08', 'Rua NBA, 1999', 'magic@gmail.com', '16993932020');
-
 
 INSERT INTO Aluno (nome, sobrenome, data_nascimento, endereco, email, celular) 
 VALUES 
@@ -63,7 +75,7 @@ VALUES
 ('Rafael', 'Barbosa', '2002-09-30', 'Rua do Céu, 606', 'rafael.barbosa@gmail.com', '16989987654'),
 ('Carla', 'Nunes', '2001-04-20', 'Rua das Estrelas, 707', 'carla.nunes@gmail.com', '16988876543');
 
-
+-- FAZENDO INSERT NA TABELA Livro
 INSERT INTO Livro (titulo, autor, editora, ano_publicacao, isbn, quant_total, quant_disponivel, valor_aquisicao, status_livro_emprestado) 
 VALUES 
 ('O Senhor dos Anéis', 'J.R.R. Tolkien', 'HarperCollins', '1954', '978-0007525546', 10, 10, 150.00, 'Disponível'),
@@ -76,7 +88,6 @@ VALUES
 ('Orgulho e Preconceito', 'Jane Austen', 'Penguin Classics', '1813', '978-0141439518', 7, 7, 90.00, 'Disponível'),
 ('Moby Dick', 'Herman Melville', 'Penguin Classics', '1851', '978-0142437247', 4, 4, 100.00, 'Disponível'),
 ('Guerra e Paz', 'Liev Tolstói', 'Companhia das Letras', '1869', '978-8535922343', 3, 3, 130.00, 'Disponível');
-
 
 INSERT INTO Livro (titulo, autor, editora, ano_publicacao, isbn, quant_total, quant_disponivel, valor_aquisicao, status_livro_emprestado) 
 VALUES 
@@ -91,8 +102,7 @@ VALUES
 ('O Nome da Rosa', 'Umberto Eco', 'Editora Record', '1980', '978-8501061942', 4, 4, 90.00, 'Disponível'),
 ('Admirável Mundo Novo', 'Aldous Huxley', 'Companhia das Letras', '1932', '978-8535924118', 3, 3, 80.00, 'Disponível');
 
-
-
+-- FAZENDO INSERT NA TABELA Emprestimo
 INSERT INTO Emprestimo (id_aluno, id_livro, data_emprestimo, data_devolucao, status_emprestimo) 
 VALUES 
 (1, 2, '2024-09-01', '2024-09-15', 'Em andamento'),
@@ -123,5 +133,4 @@ VALUES
 (8, 9, '2024-09-08', '2024-09-22', 'Em andamento'),
 (9, 10, '2024-09-09', '2024-09-23', 'Em andamento'),
 (10, 1, '2024-09-10', '2024-09-24', 'Em andamento');
-
 
