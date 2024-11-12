@@ -211,7 +211,7 @@ export class Aluno {
             const querySelectAluno = `SELECT * FROM aluno`;
             const respostaBD = await database.query(querySelectAluno);
 
-            respostaBD.rows.forEach((linha: { nome: string; sobrenome: string; data_nascimento: string | number | Date; endereco: string; email: string; celular: string; id_aluno: number; }) => {
+            respostaBD.rows.forEach((linha) => {
                 const novoAluno = new Aluno(
                     linha.nome,
                     linha.sobrenome,
@@ -222,6 +222,7 @@ export class Aluno {
                 );
 
                 novoAluno.setIdAluno(linha.id_aluno);
+                novoAluno.setRa(linha.ra)
 
                 listaDeAlunos.push(novoAluno);
             });
@@ -248,11 +249,11 @@ export class Aluno {
         try {
             const queryInsertAluno = `INSERT INTO aluno (nome, sobrenome, data_nascimento, endereco, email, celular)
                                       VALUES
-                                      ('${aluno.getNome()}', 
-                                      '${aluno.getSobrenome()}', 
-                                      '${aluno.getDataNascimento()}',
-                                       '${aluno.getEndereco()}', 
-                                       '${aluno.getEmail()}', 
+                                      ('${aluno.getNome()}',
+                                       '${aluno.getSobrenome()}',
+                                       '${aluno.getDataNascimento()}',
+                                       '${aluno.getEndereco()}',
+                                       '${aluno.getEmail()}',
                                        '${aluno.getCelular()}')
                                       RETURNING id_aluno;`;
 

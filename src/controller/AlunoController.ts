@@ -4,7 +4,7 @@ import { Aluno } from "../model/Aluno";
 interface AlunoDTO {
     nome: string,
     sobrenome: string,
-    dataNascimento: Date,
+    data_nascimento: Date,
     endereco: string,
     email: string,
     celular: string
@@ -34,7 +34,7 @@ export class AlunoController extends Aluno {
             return res.status(200).json(listaDeAlunos);
         } catch (error) {
             // Lança uma mensagem de erro no console
-            console.log('Erro ao acessar listagem de alunos');
+            console.log('Erro ao acessar lista de alunos');
 
             // Retorna uma mensagem de erro para quem fez a requisição
             return res.status(400).json({ mensagem: "Não foi possível acessar a listagem de alunos" });
@@ -63,7 +63,7 @@ export class AlunoController extends Aluno {
             const novoAluno = new Aluno(
                 alunoRecebido.nome,
                 alunoRecebido.sobrenome,
-                alunoRecebido.dataNascimento,
+                alunoRecebido.data_nascimento,
                 alunoRecebido.endereco,
                 alunoRecebido.email,
                 alunoRecebido.celular,

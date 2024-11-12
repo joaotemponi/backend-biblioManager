@@ -6,7 +6,7 @@ interface EmprestimoDTO {
     idLivro: number,
     dataEmprestimo: Date,
     dataDevolucao: Date,
-    statusEmprestimo: string  // Corrigido para string, conforme a sua necessidade
+    statusEmprestimo: string 
 }
 
 export class EmprestimoController extends Emprestimo {
