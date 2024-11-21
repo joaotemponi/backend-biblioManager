@@ -330,6 +330,8 @@ export class Livro {
                            '${livro.getStatusLivroEmprestado()}')
                           RETURNING id_livro;`;
 
+            console.log(queryInsertLivro);
+
             // Executa a query no banco e armazena a resposta
             const respostaBD = await database.query(queryInsertLivro);
 

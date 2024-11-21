@@ -5,12 +5,12 @@ interface LivroDTO {
     titulo: string,
     autor: string,
     editora: string,
-    anoPublicacao: Date,
+    ano_publicacao: Date,
     isbn: string,
-    quantTotal: number,
-    quantDisponivel: number,
-    valorAquisicao: number,
-    statusLivroEmprestado: string
+    quant_total: number,
+    quant_disponivel: number,
+    valor_aquisicao: number,
+    status_livro_emprestado: string
 }
 
 /**
@@ -69,12 +69,12 @@ export class LivroController extends Livro {
                 livroRecebido.titulo,
                 livroRecebido.autor,
                 livroRecebido.editora,
-                livroRecebido.anoPublicacao,
+                livroRecebido.ano_publicacao,
                 livroRecebido.isbn,
-                livroRecebido.quantTotal,
-                livroRecebido.quantDisponivel,
-                livroRecebido.valorAquisicao,
-                livroRecebido.statusLivroEmprestado
+                livroRecebido.quant_total,
+                livroRecebido.quant_disponivel,
+                livroRecebido.valor_aquisicao,
+                livroRecebido.status_livro_emprestado
             );
 
             // Chama a função de cadastro passando o objeto como parâmetro

@@ -1,6 +1,4 @@
-import { query } from "express";
 import { DatabaseModel } from "./DatabaseModel";
-import { inspect } from "util";
 
 const database = new DatabaseModel().pool;
 
