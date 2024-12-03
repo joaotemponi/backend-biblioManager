@@ -353,4 +353,62 @@ export class Livro {
             return false;
         }
     }
+
+    static async removerLivro(idLivro: number): Promise<boolean> {
+        try {
+            const queryDeleteLivro = `DELETE FROM livro WHERE id_livro = ${idLivro}`;
+
+            const respostaBD = await database.query(queryDeleteLivro);
+
+            if (respostaBD.rowCount != 0) {
+                // Exibe uma mensagem no console
+                console.log(`Livro removido com sucesso. ID removido: ${idLivro}`);
+                // Retorna true, indicando que o livro foi removido
+                return true;
+            }
+
+            return false;
+
+        } catch (error) {
+
+            console.log(`Erro ao remover livro. Verifique os logs para mais detalhes.`);
+
+            console.log(error);
+            // Retorna false, indicando que a remoção não foi feita
+            return false;
+        }
+    }
+
+    static async atualizarLivro(livro: Livro): Promise<boolean> {
+        try {
+            const queryUpdateLivro = ` UPDATE livro SET
+                titulo = '${livro.getTitulo()}',
+                autor = '${livro.getAutor()}',
+                editora = '${livro.getEditora()}',
+                ano_publicacao = '${livro.getAnoPublicacao()}',
+                isbn = '${livro.getIsbn()}',
+                quant_total = ${livro.getQuantTotal()},
+                quant_disponivel = ${livro.getQuantDisponivel()},
+                valor_aquisicao = ${livro.getValorAquisicao()},
+                status_livro_emprestado = '${livro.getStatusLivroEmprestado()}'
+            WHERE id_livro = ${livro.getIdLivro()};
+`;
+
+            const respostaBD = await database.query(queryUpdateLivro);
+
+            if (respostaBD.rowCount !== 0) {
+                console.log(`Livro atualizado com sucesso! ID do livro: ${livro.getIdLivro()}`);
+                return true;
+            } else {
+                console.log(`Livro não encontrado ou não foi possível atualizar. ID do livro: ${livro.getIdLivro()}`);
+                return false;
+            }
+        } catch (error) {
+            console.log("Erro ao atualizar o livro. Verifique os logs para mais detalhes.");
+            console.log(error);
+            return false;
+        }
+    }
+
 }
+

@@ -4,7 +4,7 @@ import { Aluno } from "../model/Aluno";
 interface AlunoDTO {
     nome: string,
     sobrenome: string,
-    data_nascimento: Date,
+    dataNascimento: Date,
     endereco: string,
     email: string,
     celular: string
@@ -25,6 +25,8 @@ export class AlunoController extends Aluno {
     * @returns Lista de alunos em formato JSON com status 200 em caso de sucesso.
     * @throws Retorna um status 400 com uma mensagem de erro caso ocorra uma falha ao acessar a listagem de alunos.
     */
+
+
     static async listar(req: Request, res: Response): Promise<any> {
         try {
             // Acessa a função de listar os alunos e armazena o resultado
@@ -63,15 +65,17 @@ export class AlunoController extends Aluno {
             const novoAluno = new Aluno(
                 alunoRecebido.nome,
                 alunoRecebido.sobrenome,
-                alunoRecebido.data_nascimento,
+                alunoRecebido.dataNascimento,
                 alunoRecebido.endereco,
                 alunoRecebido.email,
                 alunoRecebido.celular,
             );
 
+
             // Chama a função de cadastro passando o objeto como parâmetro
             const respostaClasse = await Aluno.cadastrarAluno(novoAluno);
 
+            console.log(novoAluno);
             // Verifica a resposta da função
             if (respostaClasse) {
                 // Retorna uma mensagem de sucesso
@@ -86,6 +90,47 @@ export class AlunoController extends Aluno {
 
             // Retorna uma mensagem de erro para quem fez a requisição
             return res.status(400).json({ mensagem: "Não foi possível cadastrar o aluno. Entre em contato com o administrador do sistema." });
+        }
+    }
+
+    static async remover(req: Request, res: Response): Promise<any> {
+        try {
+            const idAluno = parseInt(req.params.idAluno as string);
+            const respostaModelo = await Aluno.removerAluno(idAluno);
+
+            if (respostaModelo) {
+                res.status(200).json({ mensagem: "O aluno foi removido com sucesso"! });
+            } else {
+                res.status(400).json({ mensagem: "Erro ao remover o aluno. Entre em contato com o administrador do sistema." });
+            }
+        } catch (error) {
+            console.log(`Erro ao remover o aluno. ${error}`)
+        };
+        return res.status(400).json({ mensagem: "Não foi possível remover o aluno. Entre em contato com o administrador do sistema" });
+    }
+
+    static async atualizar(req: Request, res: Response): Promise<any> {
+        try {
+            const alunoRecebido: AlunoDTO = req.body;
+            const idAlunoRecebido = parseInt(req.params.idAluno as string);
+            const alunoAtualiado = new Aluno(
+                alunoRecebido.nome,
+                alunoRecebido.sobrenome,
+                alunoRecebido.dataNascimento,
+                alunoRecebido.endereco,
+                alunoRecebido.email,
+                alunoRecebido.celular
+            );
+            alunoAtualiado.setIdAluno(idAlunoRecebido);
+            const respostaModelo = await Aluno.atualizarAluno(alunoAtualiado);
+            if (respostaModelo) {
+                return res.status(200).json({ mensagem: "Aluno atualizado com sucesso!" });
+            } else {
+                return res.status(400).json({ mensagem: "Erro ao atualizar o aluno. Entre em contato com o administrador do sistema." });
+            }
+        } catch (error) {
+            console.log(`Erro ao atualizar o aluno. ${error}`);
+            return res.status(400).json({ mensagem: "Não foi possível atualizar o aluno. Entre em contato com o administrador do sistema" });
         }
     }
 }

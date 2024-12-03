@@ -2,6 +2,7 @@ import { DatabaseModel } from "./DatabaseModel";
 
 const database = new DatabaseModel().pool;
 
+
 /** 
  * Classe que representa um aluno
  */
@@ -202,6 +203,9 @@ export class Aluno {
      * 
      * @returns {Promise<Array<Aluno> | null>} - Um array de objetos do tipo `Aluno` em caso de sucesso ou `null` se ocorrer um erro.
      */
+
+
+
     static async listarAlunos(): Promise<Array<Aluno> | null> {
         const listaDeAlunos: Array<Aluno> = [];
 
@@ -220,7 +224,7 @@ export class Aluno {
                 );
 
                 novoAluno.setIdAluno(linha.id_aluno);
-                novoAluno.setRa(linha.ra)
+                novoAluno.setRa(linha.ra);
 
                 listaDeAlunos.push(novoAluno);
             });
@@ -265,6 +269,49 @@ export class Aluno {
             return false;
         } catch (error) {
             console.log('Erro ao cadastrar o aluno. Consulte os logs para mais detalhes.');
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async removerAluno(id_aluno: number): Promise<boolean> {
+        try {
+            const queryDeleteAluno = `DELETE FROM aluno WHERE id_aluno = ${id_aluno}`
+
+            const respostaBD = await database.query(queryDeleteAluno);
+
+            if (respostaBD.rowCount != 0) {
+                console.log('Aluno removido com sucesso!');
+                return true;
+            }
+
+            return false;
+        } catch (error) {
+            console.log(`Erro ao remover aluno. Verifique os logs para mais detalhes.`);
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async atualizarAluno(aluno: Aluno): Promise<boolean> {
+        try {
+            const queryUpdateAluno = `UPDATE aluno SET 
+            nome = '${aluno.getNome()}',
+            sobrenome = '${aluno.getSobrenome()}',
+            data_nascimento = '${aluno.getDataNascimento()}',                
+            endereco = '${aluno.getEndereco()}',
+            email = '${aluno.getEmail()}', 
+            celular = '${aluno.getCelular()}'
+            WHERE id_aluno = ${aluno.getIdAluno()}`
+
+            const respostaBD = await database.query(queryUpdateAluno);
+
+            if (respostaBD.rowCount != 0) {
+                console.log(`Aluno atualizado com sucesso! ID do aluno: ${aluno.getIdAluno()}`);
+            }
+            return true;
+        } catch (error) {
+            console.log('Erro ao atualizar o aluno. Consulte os logs para mais detalhes.');
             console.log(error);
             return false;
         }

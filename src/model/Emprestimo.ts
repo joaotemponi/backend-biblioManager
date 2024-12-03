@@ -13,14 +13,16 @@ export class Emprestimo {
     private idEmprestimo: number = 0;
     /* Identificador do aluno */
     private idAluno: number;
+    /* Nome do aluno */
     /* Identificador do livro */
     private idLivro: number;
+    /* Nome do livro */
     /* Data do empréstimo */
     private dataEmprestimo: Date;
     /* Data de devolução */
     private dataDevolucao: Date;
     /* Status do empréstimo */
-    private statusEmprestimo: Date;
+    private statusEmprestimo: string;
 
     /**
      * Construtor da classe Emprestimo
@@ -36,7 +38,7 @@ export class Emprestimo {
         idLivro: number,
         dataEmprestimo: Date,
         dataDevolucao: Date,
-        statusEmprestimo: Date
+        statusEmprestimo: string
     ) {
         this.idAluno = idAluno;
         this.idLivro = idLivro;
@@ -70,15 +72,6 @@ export class Emprestimo {
      */
     public getIdAluno(): number {
         return this.idAluno;
-    }
-
-    /**
-     * Define o identificador do aluno.
-     * 
-     * @param idAluno O identificador do aluno a ser definido.
-     */
-    public setIdAluno(idAluno: number): void {
-        this.idAluno = idAluno;
     }
 
     /**
@@ -140,7 +133,7 @@ export class Emprestimo {
      *
      * @returns O status do empréstimo.
      */
-    public getStatusEmprestimo(): Date {
+    public getStatusEmprestimo(): string {
         return this.statusEmprestimo;
     }
 
@@ -149,33 +142,43 @@ export class Emprestimo {
      * 
      * @param statusEmprestimo O novo status do empréstimo.
      */
-    public setStatusEmprestimo(statusEmprestimo: Date): void {
+    public setStatusEmprestimo(statusEmprestimo: string): void {
         this.statusEmprestimo = statusEmprestimo;
     }
 
 
-    static async listarEmprestimos(): Promise<Array<Emprestimo> | null> {
-        const listaDeEmprestimos: Array<Emprestimo> = [];
+    static async listarEmprestimos(): Promise<any> {
+        const respostaJson: { idEmprestimo: any; idAluno: any; nomeAluno: any; idLivro: any; tituloLivro: any; dataEmprestimo: any; dataDevolucao: any; statusEmprestimo: any; }[] = [];
 
         try {
-            const querySelectEmprestimos = `SELECT * FROM emprestimo;`;
+            const querySelectEmprestimos = `SELECT e.*, 
+                                                a.nome AS nome_aluno, 
+                                                l.titulo AS titulo_livro
+                                            FROM 
+                                                Emprestimo e
+                                            JOIN 
+                                                Aluno a ON e.id_aluno = a.id_aluno
+                                            JOIN 
+                                                Livro l ON e.id_livro = l.id_livro;`;
             const respostaBD = await database.query(querySelectEmprestimos);
 
-            respostaBD.rows.forEach((linha: { id_aluno: number; id_livro: number; data_emprestimo: string | number | Date; data_devolucao: string | number | Date; status_emprestimo: Date; id_emprestimo: number; }) => {
-                const novoEmprestimo = new Emprestimo(
-                    linha.id_aluno,
-                    linha.id_livro,
-                    new Date(linha.data_emprestimo),
-                    new Date(linha.data_devolucao),
-                    linha.status_emprestimo
-                );
-
-                novoEmprestimo.setIdEmprestimo(linha.id_emprestimo);
-
-                listaDeEmprestimos.push(novoEmprestimo);
+            respostaBD.rows.forEach((linha) => {
+                // instancia (cria) objeto emprestimo
+                respostaJson.push({
+                    idEmprestimo: linha.id_emprestimo,
+                    idAluno: linha.id_aluno,
+                    nomeAluno: linha.nome_aluno,
+                    idLivro: linha.id_livro,
+                    tituloLivro: linha.titulo_livro,
+                    dataEmprestimo: linha.data_emprestimo,
+                    dataDevolucao: linha.data_devolucao,
+                    statusEmprestimo: linha.status_emprestimo
+                });
+        
             });
 
-            return listaDeEmprestimos;
+            return respostaJson;
+
         } catch (error) {
             console.log('Erro ao buscar lista de empréstimos');
             return null;
@@ -185,8 +188,11 @@ export class Emprestimo {
     static async cadastrarEmprestimo(idAluno: number, idLivro: number, dataEmprestimo: Date, dataDevolucao: Date, statusEmprestimo: string): Promise<boolean> {
         try {
             const queryInsertEmprestimo = `INSERT INTO emprestimo (id_aluno, id_livro, data_emprestimo, data_devolucao, status_emprestimo)
-                                           VALUES
-                                           (${idAluno}, ${idLivro}, '${dataEmprestimo.toISOString()}', '${dataDevolucao.toISOString()}', '${statusEmprestimo}')
+                                           VALUES (${idAluno}, 
+                                           ${idLivro},
+                                           '${dataEmprestimo}', 
+                                           '${dataDevolucao}', 
+                                           '${statusEmprestimo}')
                                            RETURNING id_emprestimo;`;
 
             const respostaBD = await database.query(queryInsertEmprestimo);
@@ -198,6 +204,28 @@ export class Emprestimo {
             return false;
         } catch (error) {
             console.log('Erro ao cadastrar o empréstimo. Consulte os logs para mais detalhes.');
+            console.log(error);
+            return false;
+        }
+    }
+
+    static async atualizarEmprestimo(emprestimo: Emprestimo): Promise<any> {
+        try {
+            const queryUpdateEmprestimo = `UPDATE emprestimo SET
+            id_aluno = ${emprestimo.getIdAluno()},
+            id_livro = ${emprestimo.getIdLivro()},
+            data_emprestimo = '${emprestimo.getDataEmprestimo()}',
+            data_devolucao = '${emprestimo.getDataDevolucao()}',
+            status_emprestimo = '${emprestimo.getStatusEmprestimo()}'
+            WHERE id_emprestimo = ${emprestimo.getIdEmprestimo()};`;
+    
+            const respostaBD = await database.query(queryUpdateEmprestimo);
+            if (respostaBD.rowCount != 0) {
+                console.log(`Empréstimo atualizado com sucesso. Id empréstimo: ${emprestimo.getIdEmprestimo()}`);
+            }
+            return true;
+        } catch (error) {
+            console.log('Erro ao atualizar o empréstimo. Consulte os logs para mais detalhes.');
             console.log(error);
             return false;
         }

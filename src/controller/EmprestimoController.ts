@@ -6,7 +6,7 @@ interface EmprestimoDTO {
     idLivro: number,
     dataEmprestimo: Date,
     dataDevolucao: Date,
-    statusEmprestimo: string 
+    statusEmprestimo: string
 }
 
 export class EmprestimoController extends Emprestimo {
@@ -57,4 +57,32 @@ export class EmprestimoController extends Emprestimo {
             return res.status(400).json({ mensagem: "Não foi possível cadastrar o empréstimo. Entre em contato com o administrador do sistema." });
         }
     }
+
+    static async atualizar(req: Request, res: Response): Promise<any> {
+        try {
+            const emprestimoRecebido: EmprestimoDTO = req.body;
+            const idEmprestimo = parseInt(req.params.idEmprestimo as string);
+            const emprestimoAtualizado = new Emprestimo(
+                emprestimoRecebido.idAluno,
+                emprestimoRecebido.idLivro,
+                emprestimoRecebido.dataEmprestimo,
+                emprestimoRecebido.dataDevolucao,
+                emprestimoRecebido.statusEmprestimo
+            );
+
+            emprestimoAtualizado.setIdEmprestimo(idEmprestimo);
+            const respostaClasse = await Emprestimo.atualizarEmprestimo(emprestimoAtualizado);
+            if (respostaClasse) {
+                return res.status(200).json({ mensagem: "Empréstimo atualizado com sucesso!" });
+            } else {
+                return res.status(400).json({ mensagem: "Erro ao atualizar o empréstimo. Entre em contato com o administrador do sistema" });
+            }
+        } catch (error) {
+            console.log(`Erro ao atualizar um pedido ${error}`);
+            return res.status(400).json({ mensagem: "Não foi possível atualizar o emprestimo. Entre em contato com o administrador do sistema" });
+
+        }
+    }
+
+
 }
