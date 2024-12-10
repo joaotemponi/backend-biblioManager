@@ -381,34 +381,38 @@ export class Livro {
 
     static async atualizarLivro(livro: Livro): Promise<boolean> {
         try {
+            // Cria uma string de consulta SQL para atualizar os dados do livro na tabela 'livro'.
             const queryUpdateLivro = ` UPDATE livro SET
-                titulo = '${livro.getTitulo()}',
-                autor = '${livro.getAutor()}',
-                editora = '${livro.getEditora()}',
-                ano_publicacao = '${livro.getAnoPublicacao()}',
-                isbn = '${livro.getIsbn()}',
-                quant_total = ${livro.getQuantTotal()},
-                quant_disponivel = ${livro.getQuantDisponivel()},
-                valor_aquisicao = ${livro.getValorAquisicao()},
-                status_livro_emprestado = '${livro.getStatusLivroEmprestado()}'
-            WHERE id_livro = ${livro.getIdLivro()};
-`;
+                titulo = '${livro.getTitulo()}',                        
+                autor = '${livro.getAutor()}',                          
+                editora = '${livro.getEditora()}',                      
+                ano_publicacao = '${livro.getAnoPublicacao()}',         
+                isbn = '${livro.getIsbn()}',                            
+                quant_total = ${livro.getQuantTotal()},                 
+                quant_disponivel = ${livro.getQuantDisponivel()},       
+                valor_aquisicao = ${livro.getValorAquisicao()},         
+                status_livro_emprestado = '${livro.getStatusLivroEmprestado()}' 
+            WHERE id_livro = ${livro.getIdLivro()};`;
 
+            // Executa a consulta SQL no banco de dados.
             const respostaBD = await database.query(queryUpdateLivro);
 
+            // Verifica se alguma linha foi afetada pela consulta (ou seja, se o livro foi encontrado e atualizado).
             if (respostaBD.rowCount !== 0) {
                 console.log(`Livro atualizado com sucesso! ID do livro: ${livro.getIdLivro()}`);
-                return true;
+                return true; // Retorna verdadeiro indicando que o livro foi atualizado com sucesso.
             } else {
                 console.log(`Livro não encontrado ou não foi possível atualizar. ID do livro: ${livro.getIdLivro()}`);
-                return false;
+                return false; // Retorna falso caso o livro não tenha sido encontrado ou atualizado.
             }
         } catch (error) {
+            // Captura e exibe erros que possam ter ocorrido durante a execução da consulta.
             console.log("Erro ao atualizar o livro. Verifique os logs para mais detalhes.");
             console.log(error);
-            return false;
+            return false; // Retorna falso indicando falha na atualização.
         }
     }
+
 
 }
 

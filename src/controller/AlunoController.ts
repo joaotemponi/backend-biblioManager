@@ -19,48 +19,38 @@ interface AlunoDTO {
 export class AlunoController extends Aluno {
 
     /**
-    * Lista todos os alunos.
-    * @param req Objeto de requisição HTTP.
-    * @param res Objeto de resposta HTTP.
-    * @returns Lista de alunos em formato JSON com status 200 em caso de sucesso.
-    * @throws Retorna um status 400 com uma mensagem de erro caso ocorra uma falha ao acessar a listagem de alunos.
-    */
-
-
+     * Lista todos os alunos.
+     * 
+     * - Acessa a função de listar alunos definida no modelo `Aluno` e retorna os dados em formato JSON.
+     * - Em caso de erro, retorna um status 400 e uma mensagem informando a falha.
+     * 
+     * @param req Objeto de requisição HTTP.
+     * @param res Objeto de resposta HTTP.
+     * @returns Lista de alunos em formato JSON com status 200 em caso de sucesso.
+     */
     static async listar(req: Request, res: Response): Promise<any> {
         try {
-            // Acessa a função de listar os alunos e armazena o resultado
             const listaDeAlunos = await Aluno.listarAlunos();
-
-            // Retorna a lista de alunos para quem fez a requisição
             return res.status(200).json(listaDeAlunos);
         } catch (error) {
-            // Lança uma mensagem de erro no console
             console.log('Erro ao acessar lista de alunos');
-
-            // Retorna uma mensagem de erro para quem fez a requisição
             return res.status(400).json({ mensagem: "Não foi possível acessar a listagem de alunos" });
         }
     }
 
     /**
-    * Método controller para cadastrar um novo aluno.
-    * 
-    * Esta função recebe uma requisição HTTP contendo os dados de um aluno no corpo da requisição
-    * e tenta cadastrar este aluno no banco de dados utilizando a função `cadastroAluno`. Caso o cadastro 
-    * seja bem-sucedido, retorna uma resposta HTTP 200 com uma mensagem de sucesso. Caso contrário, retorna
-    * uma resposta HTTP 400 com uma mensagem de erro.
-    * 
-    * @param {Request} req - Objeto de requisição HTTP, contendo o corpo com os dados do aluno.
-    * @param {Response} res - Objeto de resposta HTTP usado para retornar o status e a mensagem ao cliente.
-    * @returns {Promise<Response>} - Retorna uma resposta HTTP com o status 200 em caso de sucesso, ou 400 em caso de erro.
-    * 
-    * @throws {Error} - Se ocorrer um erro durante o processo de cadastro, uma mensagem é exibida no console e uma 
-    *                   resposta HTTP 400 com uma mensagem de erro é enviada ao cliente.
-    */
+     * Cadastra um novo aluno.
+     * 
+     * - Recebe os dados do aluno pelo corpo da requisição e utiliza o modelo `Aluno` para registrar no banco de dados.
+     * - Em caso de sucesso, retorna uma mensagem de confirmação com status 200.
+     * - Em caso de erro, retorna um status 400 e uma mensagem de falha.
+     * 
+     * @param req Objeto de requisição HTTP.
+     * @param res Objeto de resposta HTTP.
+     * @returns Mensagem de sucesso ou erro em formato JSON.
+     */
     static async cadastro(req: Request, res: Response): Promise<any> {
         try {
-            // Recuperando informações do corpo da requisição e criando um novo objeto Aluno com esses dados
             const alunoRecebido: AlunoDTO = req.body;
             const novoAluno = new Aluno(
                 alunoRecebido.nome,
@@ -71,49 +61,63 @@ export class AlunoController extends Aluno {
                 alunoRecebido.celular,
             );
 
-
-            // Chama a função de cadastro passando o objeto como parâmetro
             const respostaClasse = await Aluno.cadastrarAluno(novoAluno);
 
-            console.log(novoAluno);
-            // Verifica a resposta da função
             if (respostaClasse) {
-                // Retorna uma mensagem de sucesso
                 return res.status(200).json({ mensagem: "Aluno cadastrado com sucesso!" });
             } else {
-                // Retorna uma mensagem de erro
                 return res.status(400).json({ mensagem: "Erro ao cadastrar o aluno. Entre em contato com o administrador do sistema." });
             }
         } catch (error) {
-            // Lança uma mensagem de erro no console
             console.log(`Erro ao cadastrar um aluno. ${error}`);
-
-            // Retorna uma mensagem de erro para quem fez a requisição
             return res.status(400).json({ mensagem: "Não foi possível cadastrar o aluno. Entre em contato com o administrador do sistema." });
         }
     }
 
+    /**
+     * Remove um aluno.
+     * 
+     * - Recebe o ID do aluno pelo parâmetro da URL e utiliza o modelo `Aluno` para removê-lo do banco de dados.
+     * - Em caso de sucesso, retorna uma mensagem de confirmação com status 200.
+     * - Em caso de erro, retorna um status 400 e uma mensagem de falha.
+     * 
+     * @param req Objeto de requisição HTTP.
+     * @param res Objeto de resposta HTTP.
+     * @returns Mensagem de sucesso ou erro em formato JSON.
+     */
     static async remover(req: Request, res: Response): Promise<any> {
         try {
             const idAluno = parseInt(req.params.idAluno as string);
             const respostaModelo = await Aluno.removerAluno(idAluno);
 
             if (respostaModelo) {
-                res.status(200).json({ mensagem: "O aluno foi removido com sucesso"! });
+                return res.status(200).json({ mensagem: "O aluno foi removido com sucesso!" });
             } else {
-                res.status(400).json({ mensagem: "Erro ao remover o aluno. Entre em contato com o administrador do sistema." });
+                return res.status(400).json({ mensagem: "Erro ao remover o aluno. Entre em contato com o administrador do sistema." });
             }
         } catch (error) {
-            console.log(`Erro ao remover o aluno. ${error}`)
-        };
-        return res.status(400).json({ mensagem: "Não foi possível remover o aluno. Entre em contato com o administrador do sistema" });
+            console.log(`Erro ao remover o aluno. ${error}`);
+            return res.status(400).json({ mensagem: "Não foi possível remover o aluno. Entre em contato com o administrador do sistema" });
+        }
     }
 
+    /**
+     * Atualiza os dados de um aluno.
+     * 
+     * - Recebe o ID do aluno pelo parâmetro da URL e os novos dados pelo corpo da requisição.
+     * - Utiliza o modelo `Aluno` para atualizar o registro no banco de dados.
+     * - Em caso de sucesso, retorna uma mensagem de confirmação com status 200.
+     * - Em caso de erro, retorna um status 400 e uma mensagem de falha.
+     * 
+     * @param req Objeto de requisição HTTP.
+     * @param res Objeto de resposta HTTP.
+     * @returns Mensagem de sucesso ou erro em formato JSON.
+     */
     static async atualizar(req: Request, res: Response): Promise<any> {
         try {
             const alunoRecebido: AlunoDTO = req.body;
             const idAlunoRecebido = parseInt(req.params.idAluno as string);
-            const alunoAtualiado = new Aluno(
+            const alunoAtualizado = new Aluno(
                 alunoRecebido.nome,
                 alunoRecebido.sobrenome,
                 alunoRecebido.dataNascimento,
@@ -121,8 +125,10 @@ export class AlunoController extends Aluno {
                 alunoRecebido.email,
                 alunoRecebido.celular
             );
-            alunoAtualiado.setIdAluno(idAlunoRecebido);
-            const respostaModelo = await Aluno.atualizarAluno(alunoAtualiado);
+
+            alunoAtualizado.setIdAluno(idAlunoRecebido);
+            const respostaModelo = await Aluno.atualizarAluno(alunoAtualizado);
+
             if (respostaModelo) {
                 return res.status(200).json({ mensagem: "Aluno atualizado com sucesso!" });
             } else {
